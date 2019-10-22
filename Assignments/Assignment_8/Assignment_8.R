@@ -10,8 +10,6 @@ mushy <- read.csv("./mushroom_growth.csv")
 glimpse(mushy)
 
 
-
-
 modlight = aov(GrowthRate ~ Light * Species, data = mushy)
 summary(modlight)
 plot(mushy$GrowthRate ~ mushy$Light)
@@ -33,35 +31,21 @@ plot(mushy$GrowthRate ~ mushy$Temperature)
 abline(modtemp, col="Red")
 
 
-
-
-
 mean_sq_err <- c((Light = (mean(modlight$residuals)^2)),
                  (Nitrogen = (mean(modN$residuals)^2)),
                  (Humidity = (mean(modHum$residuals)^2)),
                  (Temperature = (mean(modtemp$residuals)^2)))
 
-names(mean_sq_err) <- c("modlight","Nitrogen","Humidity","Temperature")
+names(mean_sq_err) <- c("modlight","modN","modHum","modtemp")
 
-
-str(mean_sq_err)
-
-mean(residuals(modHum)^2)
-modlight
-modN
-modtemp
 
 bestmodel <- which(mean_sq_err == min(mean_sq_err))
-bestmodel <- get(names(mean_sq_err)[bestmodel])
-
-
-
+bestmodel <- get(names(bestmodel))
 
 
 preds = add_predictions(mushy, bestmodel) 
 glimpse(preds)
 
-preds[1:4,c()]
 unique(mushy$Species)
 intensity = data.frame(Light = rep(c(15,25,30,35),2),
                        Species = rep(unique(mushy$Species),each=4))

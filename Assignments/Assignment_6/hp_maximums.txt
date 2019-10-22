@@ -1,0 +1,4 @@
+"x"
+"original" 31
+"automatic" 4
+"max200" 15
