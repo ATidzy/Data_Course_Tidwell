@@ -1,0 +1,22 @@
+
+Call:
+lm(formula = Diversity ~ Aerosol_Density * CO2_Concentration, 
+    data = atmo)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-747.68  -96.56   -4.97  105.90  870.36 
+
+Coefficients:
+                                    Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                       -3.700e+02  9.559e+02  -0.387    0.699    
+Aerosol_Density                   -6.639e+01  3.020e+00 -21.987   <2e-16 ***
+CO2_Concentration                  7.405e-01  2.494e+00   0.297    0.767    
+Aerosol_Density:CO2_Concentration  1.830e-01  7.922e-03  23.104   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 186.8 on 294 degrees of freedom
+Multiple R-squared:  0.9274,	Adjusted R-squared:  0.9267 
+F-statistic:  1252 on 3 and 294 DF,  p-value: < 2.2e-16
+

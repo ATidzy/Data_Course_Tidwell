@@ -1,0 +1,21 @@
+
+Call:
+lm(formula = Diversity ~ Aerosol_Density * Precip, data = atmo)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-508.94 -126.56  -34.59   93.17  960.13 
+
+Coefficients:
+                         Estimate Std. Error t value Pr(>|t|)    
+(Intercept)             -4.432158  33.717563  -0.131    0.896    
+Aerosol_Density          0.473060   0.103986   4.549 7.88e-06 ***
+Precip                 210.656272   7.788157  27.048  < 2e-16 ***
+Aerosol_Density:Precip  -0.012259   0.009793  -1.252    0.212    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 203.6 on 294 degrees of freedom
+Multiple R-squared:  0.9137,	Adjusted R-squared:  0.9128 
+F-statistic:  1038 on 3 and 294 DF,  p-value: < 2.2e-16
+
