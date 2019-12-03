@@ -1,0 +1,197 @@
+---
+title: "Exam 3"
+Author: "Alyssa Tidwell"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(rmarkdown)
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(modelr)
+library(lattice)
+```
+#### YAY for ecology!  
+  **First, what does our data look like?**   
+```{r}
+BioLogData <- read.csv(file = "./BioLogData_Exam3.csv", sep = "|")
+head(BioLogData) 
+
+
+```
+
+Is it all in the ideal class type?
+```{r}
+sapply(BioLogData, class)
+
+```
+Hm. Looks alright to me.  
+Let's start to summarize and visualize the paired data.
+
+```{r}
+summary(BioLogData)
+pairs(BioLogData)
+```  
+
+### Question 1:  
+**Which sample locations are functionally different from each other in terms of what C-substrates they can utilize?**    
+The sample locations are:
+```{r, echo=FALSE}
+levels(BioLogData$Sample.ID)
+```
+And how many carbon sources are there?
+```{r, echo=FALSE}
+nlevels(BioLogData$Substrate)
+```
+Let's graph subsets of each location to help us visualize the how the carbon sources are used.   
+
+```{r, echo=FALSE, eval=TRUE, results='hide'}
+creek <- subset(x = BioLogData, Sample.ID == "Clear_Creek")
+as.data.frame(creek)
+creek <- pivot_longer(data = creek, cols= c(Hr_144, Hr_48, Hr_24), 
+                      names_to = "inc_hrs", values_to = "values") 
+
+soil1 <- subset(x = BioLogData, Sample.ID == "Soil_1")
+as.data.frame(soil1)
+soil1 <- pivot_longer(data = soil1, cols= c(Hr_144, Hr_48, Hr_24), 
+                      names_to = "inc_hrs", values_to = "values") 
+
+soil2 <- subset(x = BioLogData, Sample.ID == "Soil_2")
+as.data.frame(soil2)
+soil2 <- pivot_longer(data = soil2, cols= c(Hr_144, Hr_48, Hr_24), 
+                      names_to = "inc_hrs", values_to = "values") 
+
+
+wastewater <- subset(x = BioLogData, Sample.ID == "Waste_Water")
+as.data.frame(wastewater)
+wastewater <- pivot_longer(data = wastewater, cols= c(Hr_144, Hr_48, Hr_24),names_to = "inc_hrs", values_to = "values") 
+
+
+```
+```{r, echo=FALSE, eval=TRUE}
+
+ggplot(data=creek, aes(x = Substrate, y= values, color=inc_hrs)) +
+  geom_point() + geom_smooth(method = "lm")+
+  labs(title= "Clear Creek Values", subtitle= "Absorbancy rates after 24, 48, and 144 hours of incubation",
+       x="Carbon Source", y="Light absorbance value")+
+  scale_color_discrete(name = "Incubation time")+   
+  theme(axis.text.x=element_text(angle=90,hjust=1))+
+  theme(plot.background = element_rect(colour = "black"))
+
+ggplot(data=soil1, aes(x = Substrate, y= values, color=inc_hrs)) +
+  geom_point() + geom_smooth(method = "lm")+
+  labs(title= "Soil 1 Values", subtitle= "Absorbancy rates after 24, 48, and 144 hours of incubation" , x="Carbon Source", y="Light absorbance value")+
+  scale_color_discrete(name = "Incubation time")+  
+  theme(axis.text.x=element_text(angle=90,hjust=1))+
+  theme(plot.background = element_rect(colour = "black"))
+
+ggplot(data=soil2, aes(x = Substrate, y= values, color=inc_hrs)) +
+  geom_point() + geom_smooth(method = "lm")+
+  labs(title= "Soil 2 Values", subtitle= "Absorbancy rates after 24, 48, and 144 hours of incubation",
+       x="Carbon Source", y="Light absorbance value")+
+  scale_color_discrete(name = "Incubation time")+
+  theme(axis.text.x=element_text(angle=90,hjust=1))+
+  theme(plot.background = element_rect(colour = "black"))
+
+ggplot(data=wastewater, aes(x = Substrate, y= values, color=inc_hrs)) +
+  geom_point() + geom_smooth(method = "lm")+
+  labs(title= "Waste Water Values", subtitle= "Absorbancy rates after 24, 48, and 144 hours of incubation",
+       x="Carbon Source", y="Light absorbance value")+
+  scale_color_discrete(name = "Incubation time")+  
+  theme(axis.text.x=element_text(angle=90,hjust=1))+
+  theme(plot.background = element_rect(colour = "black"))
+
+```  
+  
+There is variance in the total amount of cabon being used and the substrate that is used as a carbon source. It looks like the soil samples are functionally different than the water sources because the water samples have less diversity in carbon sources used and lower values overall.  
+      
+### Question 2:  
+**Are Soil and Water samples significantly different overall? What about for individual carbon substrates?**     
+
+Let's make a new column of data, "type", that will allow us to see whether a sample is water-sourced or soil-sourced. We'll model with our subsets to see if there's a significant difference between the types, and simutaneously gain information about substrate significance. Because some of our variables are categorical and we later want to run a Tukey's test, we'll start with a linear fit but ultimately want to use AOV for these models. 
+
+
+```{r, echo=FALSE, eval=TRUE}
+
+creek <- creek %>% 
+  mutate(type="water")
+wastewater <- wastewater %>% 
+  mutate(type="water")
+soil1 <- soil1 %>%
+  mutate(type="soil")
+soil2 <- soil2 %>%
+  mutate(type="soil")
+
+bound <- rbind(creek, wastewater, soil1, soil2)
+
+```
+```{r, echo=TRUE, eval=TRUE}
+moda <- aov(data = bound, values ~ Substrate * type)
+summary(moda)
+modb <- aov(data = bound, values ~ Substrate+type)
+summary(modb)
+
+```
+  According to these models, the sample type is a predictor of values, and so is carbon source.  Let's try to visualize the difference of utilization for each carbon source.
+```{r, echo=FALSE, eval=TRUE}
+
+ggplot(data=bound, aes(x=type, y=values, color = type))+
+  geom_boxplot()+
+  facet_wrap(~Substrate)
+
+```
+
+  
+### Question 3:  
+**If there are differences between samples, which C-substrates are driving those differences?**  
+The C-substrates that are driving the differences are any substrate with the higheset significance codes from the following list:
+```{r, echo=FALSE , eval= TRUE}
+modc <- lm(data = bound, values ~Substrate*type)
+summary(modc)
+
+```
+
+### Question 4:  
+**Does the dilution factor change any of these answers?**    
+```{r, echo=FALSE, eval=TRUE}
+
+mod1 <- aov(data=creek, creek$values~creek$Dilution)
+plot(creek$values~creek$Dilution)
+abline(mod1)
+summary(mod1)
+
+
+mod2 <- aov(data=soil1, soil1$values~soil1$Dilution)
+plot(soil1$values~soil1$Dilution)
+abline(mod2)
+summary(mod2)
+
+
+mod3 <- aov(data=soil2, soil2$values~soil2$Dilution)
+plot(soil2$values~soil2$Dilution)
+abline(mod3)
+summary(mod3)
+
+mod4 <- aov(data=wastewater, wastewater$values~wastewater$Dilution)
+plot(wastewater$values~wastewater$Dilution)
+abline(mod4)
+summary(mod4)
+
+
+```
+  
+Less carbon is being consumed as the concentration of the soil samples increases.  
+More carbon is being consumed as the concentration of the water samples increases.
+  
+### Question 5:  
+**Do the control samples indicate any contamination?**    
+Water is the negative control. If the BioLog machine reads a light absorbtion value other than 0 for the negative control, there is contamination.
+```{r, echo=FALSE, eval=TRUE}
+water <- BioLogData %>%
+  filter(BioLogData$Substrate == "Water")
+water
+```
+Looking at the values under Hr_24, Hr_48, and Hr_144, we can see that all of the values are 0, telling us that there was no contamination measured at any point during incubation.
